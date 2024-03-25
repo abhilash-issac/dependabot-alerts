@@ -1,0 +1,18 @@
+name: 'Dependabot Alerts Fetcher'
+description: 'Fetch Dependabot alerts for an organization or repository'
+branding:
+  icon: 'inbox'
+  color: 'blue'
+inputs:
+  org_or_repo:
+    description: 'Organization or repository name'
+    required: true
+  github_token:
+    description: 'GitHub token'
+    required: true
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.org_or_repo }}
+    - ${{ inputs.github_token }}
