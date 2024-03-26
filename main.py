@@ -70,15 +70,14 @@ def generate_markdown_summary(org_name, repo_name, alerts, org_owners, repo_admi
     for index, alert in enumerate(alerts, start=1):
         org_owners_str = ', '.join([f"{o['login']} ({o['email'] if o['email'] else 'No email'})" for o in org_owners])
         repo_admins_str = ', '.join([f"{a['login']} ({a['email'] if a['email'] else 'No email'})" for a in repo_admins])
-        # Placeholder values; replace with actual alert data extraction logic
-        package_name = "Unknown"
-        severity = "Unknown"
-        summary = "No summary available"
-        status = "Unknown"
+         # Accessing the correct keys for package name, severity, and summary
+        package_name = alert.get('vulnerable_dependency', {}).get('package_name', 'Unknown')
+        severity = alert.get('vulnerable_dependency', {}).get('severity', 'Unknown')
+        summary = alert.get('message', 'No summary available')
 
-        markdown_lines.append(
+         markdown_lines.append(
             f"| {index} | {org_name}/{repo_name} | {org_owners_str} | {repo_admins_str} | "
-            f"{package_name} | {severity} | {summary} | {status} |"
+            f"{package_name} | {severity} | {summary} | {alert.get('state', 'Unknown')} |"
         )
     return "\n".join(markdown_lines)
 
