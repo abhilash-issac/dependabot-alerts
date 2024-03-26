@@ -90,3 +90,6 @@ def main():
     full_repo_name = f'{ORG_NAME}/{REPO_NAME}'
     alerts = fetch_dependabot_alerts(full_repo_name)
     if not alerts:
+
+if __name__ == '__main__':
+    main()
