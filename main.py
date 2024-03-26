@@ -8,7 +8,7 @@ GITHUB_TOKEN = os.getenv('INPUT_GITHUB_TOKEN')
 
 headers = {
     'Authorization': f'token {GITHUB_TOKEN}',
-    'Accept': 'application/vnd.github.v3+json'  # Adjust if a specific media type is needed
+    'Accept': 'application/vnd.github.v3+json'  # Adjust if a specific media type is needed for Dependabot alerts
 }
 
 def fetch_paginated_api_data(url):
@@ -70,11 +70,11 @@ def generate_markdown_summary(org_name, repo_name, alerts, org_owners, repo_admi
     for index, alert in enumerate(alerts, start=1):
         org_owners_str = ', '.join([f"{o['login']} ({o['email'] if o['email'] else 'No email'})" for o in org_owners])
         repo_admins_str = ', '.join([f"{a['login']} ({a['email'] if a['email'] else 'No email'})" for a in repo_admins])
-        # Extract details from the alert; adjust according to the actual alert data structure
-        package_name = "Unknown"  # Placeholder, adjust based on actual data
-        severity = "Unknown"  # Placeholder, adjust based on actual data
-        summary = "No summary available"  # Placeholder, adjust based on actual data
-        status = "Unknown"  # Placeholder, adjust based on actual data
+        # Placeholder values; replace with actual alert data extraction logic
+        package_name = "Unknown"
+        severity = "Unknown"
+        summary = "No summary available"
+        status = "Unknown"
 
         markdown_lines.append(
             f"| {index} | {org_name}/{repo_name} | {org_owners_str} | {repo_admins_str} | "
@@ -90,6 +90,15 @@ def main():
     full_repo_name = f'{ORG_NAME}/{REPO_NAME}'
     alerts = fetch_dependabot_alerts(full_repo_name)
     if not alerts:
+        print("No Dependabot alerts to report.")
+        return
+
+    org_owners = fetch_org_owners(ORG_NAME)
+    repo_admins = fetch_repo_admins(full_repo_name)
+
+    markdown_summary = generate_markdown_summary(ORG_NAME, REPO_NAME, alerts, org_owners, repo_admins)
+    print(markdown_summary)
+    write_markdown_to_file(markdown_summary, "dependabot_vulnerability_report.md")
 
 if __name__ == '__main__':
     main()
