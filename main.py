@@ -75,7 +75,7 @@ def generate_markdown_summary(org_name, repo_name, alerts, org_owners, repo_admi
         severity = alert.get('vulnerable_dependency', {}).get('severity', 'Unknown')
         summary = alert.get('message', 'No summary available')
 
-         markdown_lines.append(
+        markdown_lines.append(
             f"| {index} | {org_name}/{repo_name} | {org_owners_str} | {repo_admins_str} | "
             f"{package_name} | {severity} | {summary} | {alert.get('state', 'Unknown')} |"
         )
