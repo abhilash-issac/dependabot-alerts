@@ -1,16 +1,10 @@
-FROM alpine:latest
+FROM python:3.9-slim
 
-LABEL "com.github.actions.name"="Dependabot Alerts Fetcher"
-LABEL "com.github.actions.description"="Fetch Dependabot alerts for an organization or repository"
-LABEL "com.github.actions.icon"="inbox"
-LABEL "com.github.actions.color"="blue"
+WORKDIR /action
 
-LABEL "repository"="https://github.com/CanarysPlayground/dependabot-alerts"
-LABEL "maintainer"="Abhilash Issac <abhilash.issac@ecanarys.com>"
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-RUN apk --no-cache add curl jq
+COPY main.py .
 
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["python", "/action/main.py"]
