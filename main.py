@@ -109,7 +109,7 @@ def generate_markdown_summary(org_name, repo_name, alerts, org_owners, repo_admi
         package_name = node['securityVulnerability']['package']['name']
         severity = node['securityVulnerability']['advisory']['severity']
         summary = node['securityVulnerability']['advisory']['summary']
-        status = node['status']
+        status = node.get('state', 'Unknown')
 
         org_owners_str = ', '.join([f"{o['login']} ({o['email'] if o['email'] else 'No email'})" for o in org_owners])
         repo_admins_str = ', '.join([f"{a['login']} ({a['email'] if a['email'] else 'No email'})" for a in repo_admins])
