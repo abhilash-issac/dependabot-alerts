@@ -75,7 +75,9 @@ def generate_markdown_summary(org_name, repo_name, alerts, org_owners, repo_admi
         )
     return "\n".join(markdown_lines)
 
-# The rest of the functions (fetch_user_details, fetch_org_owners, fetch_repo_admins) remain the same.
+def write_markdown_to_file(content, filename):
+    with open(filename, 'w') as file:
+        file.write(content)
 
 def main():
     alerts = fetch_dependabot_alerts(ORG_NAME, REPO_NAME)
