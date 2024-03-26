@@ -50,7 +50,7 @@ def fetch_repo_admins(full_repo_name):
     return fetch_user_details(admins)
 
 def fetch_dependabot_alerts(full_repo_name):
-    return fetch_paginated_api_data(f'https://api.github.com/repos/{full_repo_name}/vulnerability-alerts')
+    return fetch_paginated_api_data(f'https://api.github.com/repos/{full_repo_name}/dependabot/alerts')
 
 def generate_markdown_summary(org_name, repo_name, alerts, org_owners, repo_admins):
     markdown_lines = [
