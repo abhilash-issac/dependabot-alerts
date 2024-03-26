@@ -85,3 +85,4 @@ def main():
     write_markdown_to_file(markdown_summary, "dependabot_vulnerability_report.md")
 
 if __name__ == '__main__':
+    main()
