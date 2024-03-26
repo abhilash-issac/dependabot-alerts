@@ -8,7 +8,7 @@ GITHUB_TOKEN = os.getenv('INPUT_GITHUB_TOKEN')
 
 headers = {
     'Authorization': f'token {GITHUB_TOKEN}',
-    'Accept': 'application/vnd.github.v3+json'  # Ensure this is correct for the Dependabot alerts API
+    'Accept': 'application/vnd.github.v3+json'  # Adjust if a specific media type is needed
 }
 
 def fetch_paginated_api_data(url):
@@ -16,11 +16,19 @@ def fetch_paginated_api_data(url):
     while url:
         response = requests.get(url, headers=headers)
         if response.status_code == 200:
-            all_data.extend(response.json())
+            data = response.json()
+            if data:
+                all_data.extend(data)
+            else:
+                print("No data returned by the API.")
+                break
             if 'next' in response.links.keys():
                 url = response.links['next']['url']
             else:
                 url = None
+        elif response.status_code == 204:
+            print("No content available. This might mean there are no active Dependabot alerts.")
+            break
         else:
             print(f'Failed to fetch data: {response.status_code}, Response body: {response.text}')
             break
@@ -50,7 +58,8 @@ def fetch_repo_admins(full_repo_name):
     return fetch_user_details(admins)
 
 def fetch_dependabot_alerts(full_repo_name):
-    return fetch_paginated_api_data(f'https://api.github.com/repos/{full_repo_name}/dependabot/alerts')
+    alerts_url = f'https://api.github.com/repos/{full_repo_name}/dependabot/alerts'
+    return fetch_paginated_api_data(alerts_url)
 
 def generate_markdown_summary(org_name, repo_name, alerts, org_owners, repo_admins):
     markdown_lines = [
@@ -61,10 +70,15 @@ def generate_markdown_summary(org_name, repo_name, alerts, org_owners, repo_admi
     for index, alert in enumerate(alerts, start=1):
         org_owners_str = ', '.join([f"{o['login']} ({o['email'] if o['email'] else 'No email'})" for o in org_owners])
         repo_admins_str = ', '.join([f"{a['login']} ({a['email'] if a['email'] else 'No email'})" for a in repo_admins])
+        # Extract details from the alert; adjust according to the actual alert data structure
+        package_name = "Unknown"  # Placeholder, adjust based on actual data
+        severity = "Unknown"  # Placeholder, adjust based on actual data
+        summary = "No summary available"  # Placeholder, adjust based on actual data
+        status = "Unknown"  # Placeholder, adjust based on actual data
+
         markdown_lines.append(
             f"| {index} | {org_name}/{repo_name} | {org_owners_str} | {repo_admins_str} | "
-            f"{alert.get('package', {}).get('name', 'Unknown')} | {alert.get('severity', 'Unknown')} | "
-            f"{alert.get('summary', 'No summary')} | {alert.get('state', 'Unknown')} |"
+            f"{package_name} | {severity} | {summary} | {status} |"
         )
     return "\n".join(markdown_lines)
 
@@ -75,13 +89,4 @@ def write_markdown_to_file(content, filename):
 def main():
     full_repo_name = f'{ORG_NAME}/{REPO_NAME}'
     alerts = fetch_dependabot_alerts(full_repo_name)
-    org_owners = fetch_org_owners(ORG_NAME)
-    repo_admins = fetch_repo_admins(full_repo_name)
-    
-    markdown_summary = generate_markdown_summary(ORG_NAME, REPO_NAME, alerts, org_owners, repo_admins)
-    
-    print(markdown_summary)
-    write_markdown_to_file(markdown_summary, "dependabot_vulnerability_report.md")
-
-if __name__ == '__main__':
-    main()
+    if not alerts:
