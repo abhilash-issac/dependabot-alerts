@@ -52,20 +52,23 @@ def fetch_repo_admins(full_repo_name):
 
 def fetch_dependabot_alerts(full_repo_name):
     return fetch_paginated_api_data(f'https://api.github.com/repos/{full_repo_name}/vulnerability-alerts')
+    # return fetch_paginated_api_data(f'https://api.github.com/repos/{org_name}/{repo_name}/alerts')
 
-def generate_markdown_summary(org_name, repo_name, secret_alerts, dependabot_alerts, org_owners, repo_admins):
+def generate_markdown_summary(org_name, repo_name, dependabot_alerts, org_owners, repo_admins):
     markdown_lines = [
-        "## Security Report",
-        "| S.No | Org/Repo Name | Org Owners | Repo Admins | Alert Number | Alert Type | State | Alert URL |",
-        "| ---- | ------------- | ---------- | ----------- | ------------ | ---------- | ----- | --------- |"
+        "## Dependabot Alerts",
+        "| SI No | Org/Repo Name | Org Owners | Repo Admins | Package Name | Severity | Summary | Status |\n")
+        "|-------| ------------- | ---------- | ----------- |--------------|----------|---------|--------|\n")
     ]
-    for index, alert in enumerate(secret_alerts + dependabot_alerts, start=1):
+    for index, alert in enumerate(dependabot_alerts, start=1):
         org_owners_str = ', '.join([f"{o['login']} ({o['email'] if o['email'] else 'No email'})" for o in org_owners])
         repo_admins_str = ', '.join([f"{a['login']} ({a['email'] if a['email'] else 'No email'})" for a in repo_admins])
+        package_name = alert.get('repository').get('name')
+        severity = alert.get('severity')
+        summary = alert.get('vulnerability').get('title')
+        status = alert.get('dismissed_at') or "Open"
         markdown_lines.append(
-            f"| {index} | {org_name}/{repo_name} | {org_owners_str} | {repo_admins_str} | "
-            f"{alert.get('number', 'N/A')} | {alert.get('type', 'Unknown')} | "
-            f"{alert.get('state', 'Unknown')} | [Link]({alert.get('html_url', 'URL Not Available')}) |"
+            f"| {index} | {org_name}/{repo_name} | {org_owners_str} | {repo_admins_str} | {package_name} | {severity} | {summary} | {status} |"
         )
     return "\n".join(markdown_lines)
 
@@ -79,7 +82,7 @@ def main():
     org_owners = fetch_org_owners(ORG_NAME)
     repo_admins = fetch_repo_admins(full_repo_name)
     
-    markdown_summary = generate_markdown_summary(ORG_NAME, REPO_NAME, secret_alerts, dependabot_alerts, org_owners, repo_admins)
+    markdown_summary = generate_markdown_summary(ORG_NAME, REPO_NAME, dependabot_alerts, org_owners, repo_admins)
     
     print(markdown_summary)
     write_markdown_to_file(markdown_summary, "security_report.md")
