@@ -63,7 +63,8 @@ def generate_markdown_summary(org_name, repo_name, alerts, org_owners, repo_admi
         repo_admins_str = ', '.join([f"{a['login']} ({a['email'] if a['email'] else 'No email'})" for a in repo_admins])
         markdown_lines.append(
             f"| {index} | {org_name}/{repo_name} | {org_owners_str} | {repo_admins_str} | "
-            f"Unknown | Unknown | Unknown | Unknown |"
+            f"{alert.get('package', {}).get('name', 'Unknown')} | {alert.get('severity', 'Unknown')} | "
+            f"{alert.get('summary', 'No summary')} | {alert.get('state', 'Unknown')} |"
         )
     return "\n".join(markdown_lines)
 
