@@ -8,7 +8,7 @@ GITHUB_TOKEN = os.getenv('INPUT_GITHUB_TOKEN')
 
 headers = {
     'Authorization': f'token {GITHUB_TOKEN}',
-    'Accept': 'application/vnd.github.v3+json'  # Ensure this is set correctly for Dependabot alerts API
+    'Accept': 'application/vnd.github.v3+json'  # Ensure this is correct for the Dependabot alerts API
 }
 
 def fetch_paginated_api_data(url):
@@ -22,7 +22,7 @@ def fetch_paginated_api_data(url):
             else:
                 url = None
         else:
-            print(f'Failed to fetch data: {response.status_code}')
+            print(f'Failed to fetch data: {response.status_code}, Response body: {response.text}')
             break
     return all_data
 
@@ -38,7 +38,7 @@ def fetch_user_details(users):
                 'email': user_data.get('email')  # May be None if the email is not public
             })
         else:
-            print(f'Failed to fetch user details for {user["login"]}: {response.status_code}')
+            print(f'Failed to fetch user details for {user["login"]}: {response.status_code}, Response body: {response.text}')
     return user_details
 
 def fetch_org_owners(org_name):
@@ -61,11 +61,9 @@ def generate_markdown_summary(org_name, repo_name, alerts, org_owners, repo_admi
     for index, alert in enumerate(alerts, start=1):
         org_owners_str = ', '.join([f"{o['login']} ({o['email'] if o['email'] else 'No email'})" for o in org_owners])
         repo_admins_str = ', '.join([f"{a['login']} ({a['email'] if a['email'] else 'No email'})" for a in repo_admins])
-        # Adjust the following line to match the structure of your Dependabot alert data
         markdown_lines.append(
             f"| {index} | {org_name}/{repo_name} | {org_owners_str} | {repo_admins_str} | "
-            f"{alert.get('package', {}).get('name', 'Unknown')} | {alert.get('severity', 'Unknown')} | "
-            f"{alert.get('summary', 'No summary')} | {alert.get('state', 'Unknown')} |"
+            f"Unknown | Unknown | Unknown | Unknown |"
         )
     return "\n".join(markdown_lines)
 
